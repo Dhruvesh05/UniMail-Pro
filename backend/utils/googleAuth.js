@@ -6,14 +6,14 @@ dotenv.config();
 const oAuth2Client = new google.auth.OAuth2(
   process.env.GMAIL_CLIENT_ID,
   process.env.GMAIL_CLIENT_SECRET,
-  "https://developers.google.com/oauthplayground" // redirect URI
+  "https://developers.google.com/oauthplayground"
 );
 
 oAuth2Client.setCredentials({
   refresh_token: process.env.GMAIL_REFRESH_TOKEN,
 });
 
-export const sendMail = async ({ to, subject, text, html }) => {
+export const sendMail = async ({ to, subject, text, attachments = [] }) => {
   try {
     const accessToken = await oAuth2Client.getAccessToken();
 
@@ -21,7 +21,7 @@ export const sendMail = async ({ to, subject, text, html }) => {
       service: "gmail",
       auth: {
         type: "OAuth2",
-        user: process.env.GMAIL_USER_EMAIL,
+        user: process.env.GMAIL_USER_EMAIL, // demoxiepaulo@gmail.com
         clientId: process.env.GMAIL_CLIENT_ID,
         clientSecret: process.env.GMAIL_CLIENT_SECRET,
         refreshToken: process.env.GMAIL_REFRESH_TOKEN,
@@ -29,7 +29,14 @@ export const sendMail = async ({ to, subject, text, html }) => {
       },
     });
 
-    const mailOptions = { from: process.env.GMAIL_USER_EMAIL, to, subject, text, html };
+    const mailOptions = {
+      from: process.env.GMAIL_USER_EMAIL,
+      to,
+      subject,
+      text,
+      attachments,
+    };
+
     const result = await transporter.sendMail(mailOptions);
     return result;
   } catch (error) {
